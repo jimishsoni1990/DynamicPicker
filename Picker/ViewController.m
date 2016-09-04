@@ -10,6 +10,7 @@
 
 @interface ViewController ()
 {
+    // This are local scop variables
     NSArray* data;
     NSArray *country;
     NSArray *state;
