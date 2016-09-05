@@ -15,5 +15,8 @@
 @property (strong, nonatomic) IBOutlet UILabel *countrylbl;
 @property (strong, nonatomic) IBOutlet UILabel *statelbl;
 @property (strong, nonatomic) IBOutlet UILabel *citylbl;
+
+-(int) getStateCount;
+-(NSString*) getStateName: (NSInteger)index;
 @end
 

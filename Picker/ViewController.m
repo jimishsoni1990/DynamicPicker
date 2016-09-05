@@ -10,28 +10,20 @@
 
 @interface ViewController ()
 {
-    // This are local scop variables
+    
     NSArray* data;
-    NSArray *country;
-    NSArray *state;
-    NSArray *city;
     NSString * selectedCountry;
     NSString * selectedState;
     NSString * selectedCity;
-    NSDictionary * statesDict;
-    NSArray * stateArray;
-    NSArray * cityArray;
     
-    NSDictionary * defaultCountry;
-    NSString * defaultState;
-    NSArray * defaultCity;
-
 }
 @end
 
 @implementation ViewController
 
 @synthesize picker, countrylbl, statelbl, citylbl;
+
+
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -40,16 +32,19 @@
     
    data = @[
                        @{
-                           @"name":@"INDIA",
+                           @"name":@"IN",
                            @"states": @[
                                         @{
-                                            @"GJ": @[@"Ahmedabad", @"Baroda"]
+                                            @"name": @"GJ",
+                                            @"city": @[@"Ahmedabad", @"Baroda"]
                                             },
                                         @{
-                                            @"RJ": @[@"Udaipur", @"Jaipur"]
+                                            @"name": @"RJ",
+                                            @"city": @[@"Udaipur", @"Jaipur"]
                                             },
                                         @{
-                                            @"MH": @[@"Mumbai", @"Pune"]
+                                            @"name": @"MH",
+                                            @"city": @[@"Mumbai", @"Pune"]
                                             }
                                         ]
                            },
@@ -57,27 +52,129 @@
                        @{
                            @"name":@"US",
                            @"states": @[
-                                   @{
-                                       @"NY": @[@"Ahmedabad", @"Baroda"]
-                                       },
-                                   @{
-                                       @"NJ": @[@"Udaipur", @"Jaipur"]
-                                       },
-                                   @{
-                                       @"TX": @[@"Mumbai", @"Pune"]
-                                       }
-                                   ]
+                                   
+                                       @{
+                                           @"name": @"NY",
+                                           @"city": @[@"NY1", @"NY2"]
+                                           },
+                                       @{
+                                           @"name": @"NJ",
+                                           @"city": @[@"NJ1", @"NJ2"]
+                                           },
+                                       @{
+                                           @"name": @"TX",
+                                           @"city": @[@"TX1", @"TX2"]
+                                           }
+                                       ]
                            }
                        ];
     
-    NSDictionary * defaultValues = [data objectAtIndex:0];
-    defaultCountry = [defaultValues valueForKey:@"name"];
     
-    NSArray * availableStates = [defaultValues valueForKey:@"states"];
-    NSDictionary * states = [availableStates objectAtIndex:0];
-    defaultState = [states valueForKey:@"GJ"];
+    // Let's set some defaults
+    // Default country
+    
+    NSDictionary * defaultCountry = [data objectAtIndex:0];
+    
+    selectedCountry = [defaultCountry valueForKey:@"name"];
+    
+    // Default state
+    
+    NSArray * availableStates = [defaultCountry valueForKey:@"states"];
+    NSDictionary * defaultState = [availableStates objectAtIndex:0];
+    selectedState = [defaultState valueForKey:@"name"];
     
     
+    // Default city
+    NSArray * availablecity = [defaultState valueForKey:@"city"];
+    selectedCity = [availablecity objectAtIndex:0];
+    
+}
+
+-(int) getCountryCount{
+    
+    return (int)data.count;
+}
+
+-(int) getStateCount{
+    
+    for(NSDictionary * countryDict in data){
+        
+        if( [[countryDict valueForKey:@"name"] isEqualToString:selectedCountry] ){
+            NSArray* allStates = [countryDict valueForKey:@"states"];
+            return (int)[allStates count];
+            
+        }
+    }
+    
+    return 0;
+}
+
+-(int) getCityCount{
+    
+    for(NSDictionary * countryDict in data){
+        
+        if( [[countryDict valueForKey:@"name"] isEqualToString:selectedCountry] ){
+            NSArray* allStates = [countryDict valueForKey:@"states"];
+            
+            for(NSDictionary * stateDict in allStates){
+                
+                if( [[stateDict valueForKey:@"name"] isEqualToString:selectedState] ){
+                    return (int)[[stateDict valueForKey:@"city"]count];
+                }
+                
+            }
+            
+        }
+    }
+    
+    return 0;
+}
+
+-(NSString*) getCountryName: (NSInteger)index{
+    
+    NSDictionary * countryDict = [data objectAtIndex:index];
+    return [countryDict valueForKey:@"name"];
+    
+}
+
+-(NSString*) getStateName: (NSInteger)index{
+    
+    for(NSDictionary * countryDict in data){
+        
+        if( [[countryDict valueForKey:@"name"] isEqualToString:selectedCountry] ){
+            
+            NSArray* allStates = [countryDict valueForKey:@"states"];
+            
+            NSDictionary * stateDict = [allStates objectAtIndex:index];
+            return [stateDict valueForKey:@"name"];
+            
+            
+        }
+    }
+    
+    return @"";
+}
+
+-(NSString*) getCityName: (NSInteger)index{
+    
+    for(NSDictionary * countryDict in data){
+        
+        if( [[countryDict valueForKey:@"name"] isEqualToString:selectedCountry] ){
+            NSArray* allStates = [countryDict valueForKey:@"states"];
+            
+            for(NSDictionary * stateDict in allStates){
+                
+                if( [[stateDict valueForKey:@"name"] isEqualToString:selectedState] ){
+                    NSArray * allCities = [stateDict valueForKey:@"city"];
+                    return [allCities objectAtIndex:index];
+                }
+                
+            }
+            
+        }
+    }
+    
+    return @"";
 }
 
 -(NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView{
@@ -86,45 +183,41 @@
 
 -(NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component{
     switch (component) {
+            
         case 0:
-            return data.count;
+            return [self getCountryCount];
             break;
             
         case 1:
-            statesDict = [data valueForKey:selectedCountry];
-            stateArray = [statesDict allKeys];
-            return stateArray.count;
+            return [self getStateCount];
             break;
             
+            
         case 2:
-            cityArray = [data valueForKey:selectedState];
-            return cityArray.count;
+            return [self getCityCount];
             break;
             
         default:
             break;
+            
     }
     return 0;
 }
 
 -(NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component{
     
-    NSArray* allcountries = data;
        switch (component) {
         case 0:
-            return [allcountries objectAtIndex:row];
-            break;
+               return [self getCountryName: row];
+               break;
             
         case 1:
-            statesDict = [data valueForKey:selectedCountry];
-            stateArray = [statesDict allKeys];
-            return [stateArray objectAtIndex:row];
-            break;
+               return [self getStateName: row];
+               break;
             
         case 2:
-            cityArray = [data valueForKey:selectedState];
-            return [cityArray objectAtIndex:row];
-            break;
+               return [self getCityName: row];
+               break;
             
         default:
             break;
@@ -136,15 +229,20 @@
 
 -(void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component{
     
-    selectedCountry = [NSString stringWithFormat:@"%@", [country objectAtIndex:[picker selectedRowInComponent:0] ]];
+    NSDictionary* countryDict = [data objectAtIndex:[picker selectedRowInComponent:0]];
+    selectedCountry = [countryDict valueForKey:@"name"];
     
-    [picker reloadComponent:1];
+    //NSLog(@"Country: %@", selectedCountry);
     
-    selectedState = [NSString stringWithFormat:@"%@", [state objectAtIndex:[picker selectedRowInComponent:1] ]];
+    [picker reloadComponent:1]; // reload the 2nd column in picker. i.e state column
     
-    [picker reloadComponent:2];
+    selectedState = [self getStateName:[picker selectedRowInComponent:1]];
     
-    selectedCity = [NSString stringWithFormat:@"%@", [city objectAtIndex:[picker selectedRowInComponent:2] ]];
+    //NSLog(@"State: %@", selectedState);
+    
+    [picker reloadComponent:2]; // reload the 3rd column in picker. i.e city column
+    
+    selectedCity = [self getCityName:[picker selectedRowInComponent:2]];
     
     countrylbl.text = selectedCountry;
     statelbl.text = selectedState;
